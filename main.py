@@ -1,5 +1,4 @@
 # peru
-import imp
 from operator import pos
 from turtle import bgcolor, color
 from kivy.app import App
@@ -12,15 +11,19 @@ from kivymd.uix.screen import MDScreen
 from kivymd.uix.label import MDLabel
 from gps import GPSConf
 
-
+gpsd=GPSConf
 
 class Main(MDApp):
     def build(self):
-        screen = MDScreen()
-        astralabel = MDLabel(text=f"ASTRAVAM 7w7\nEstas en {platform}", pos={0.5, 0.2})
-        screen.add_widget(astralabel)
-        start_btn=MDRectangleFlatButton(text="Comienza!", pos_hint={"center_x": 0.5, "center_y": 0.5})
-        screen.add_widget(start_btn)
-        start_btn.bind(on_press = GPSConf.run)
-        return screen
+        self.gps_stat=False
+        self.location=dict()
+        self.screen = MDScreen()
+        self.gps_label=MDLabel(text="No hay informacion del GPS", pos_hint={"center_x": 1.2, "center_y": 0.05})
+        self.screen.add_widget(self.gps_label)
+        self.start_btn=MDRectangleFlatButton(text="Comienza!", pos_hint={"center_x": 0.5, "center_y": 0.5})
+        self.screen.add_widget(self.start_btn)
+        self.start_btn.bind(on_press = self.call_gps)
+        return self.screen
+    def call_gps(self,*args):
+        gpsd.run()
 Main().run()
