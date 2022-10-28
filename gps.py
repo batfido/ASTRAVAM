@@ -4,6 +4,7 @@ from kivy.uix.label import Label
 from kivy.utils import platform
 from kivymd.uix.dialog import MDDialog
 from plyer import gps
+from kivymd.uix.button import MDRectangleFlatButton
 
 class GPSConf():
     def __init__(self):
@@ -73,10 +74,15 @@ class GPSOperator():
             app.gps_label.text= "No se detecta un GPS utilizable por el sistema"
             win_cheeser.set_location()
             app.cheese_btn=MDRectangleFlatButton(text="Revisa alertas", pos_hint={"center_x": 0.5, "center_y": 0.3})
-            app.add_widget(app.cheese_btn)
-            app.cheese_btn.bind(on_press = check_gps)
+            app.screen.add_widget(app.cheese_btn)
+            app.cheese_btn.bind(on_press = self.check_gps)
+
+
+
     def check_gps():
-        print("eyacula")
+        app = App.get_running_app()
+
+        pass
 
 
 
