@@ -5,6 +5,14 @@ from kivy.utils import platform
 from kivymd.uix.dialog import MDDialog
 from plyer import gps
 from kivymd.uix.button import MDRectangleFlatButton
+from kivy.core.audio import SoundLoader
+from os import path
+from time import time
+
+
+deg_to_rad = 0.0174533
+
+
 
 class GPSConf():
     def __init__(self):
@@ -50,15 +58,23 @@ class WinCheeser():
 
     def set_location(*args, **kwargs):
         app = App.get_running_app()
-        app.location["lat"]=float(input("Lat"))
+        #app.location["lat"]=float(input("Lat"))
+        #app.location["lat"]=-33.500163752818224
+        location = input("Coords?   ")
+        location = location.split(",")
+        app.location["lat"] = float(location[0])
+        app.location["lon"] = float(location [1])
         app.lat_label.text=str(app.location["lat"])
-        app.location["lon"]=float(input("Lon"))
+        #app.location["lon"]=float(input("Lon"))
+        #app.location["lon"]=-70.61100120164757
         app.lon_label.text=str(app.location["lon"])
 
 
 
 class GPSOperator():
     def __init__(self) -> None:
+        self.id = "op"
+        self.last_played=-999999999999
         pass
     def start_gps(self, *args, **kwargs):
         perm_manager=PermManager()
@@ -79,11 +95,26 @@ class GPSOperator():
 
 
 
-    def check_gps():
+    def check_gps(*args, **kwargs):
+        self = args[0]
         app = App.get_running_app()
+        lat = app.location["lat"]
+        lon = app.location["lon"]
+        a_lat = app.alerta["lat"]
+        a_lon = app.alerta["lon"]
+        if a_lat - 0.0001 < lat < a_lat + 0.0001 and a_lon - 0.0001 < lon < a_lon + 0.0001:
+            print(a_lat - 0.0001 < lat < a_lat + 0.0001 and a_lon - 0.0001 < lon < a_lon + 0.0001)
+            self.alertar_pare(time())
 
         pass
-
+    
+    def alertar_pare(*args, **kwargs):
+        alerta = SoundLoader.load(path.join("resources","Pare_50m.mp3"))
+        print(alerta)
+        if time()-args[0].last_played >=3:
+            alerta.seek(0)
+            args[0].last_played=time()
+            alerta.play()
 
 
     def update_loc(self, *args, **kwargs):

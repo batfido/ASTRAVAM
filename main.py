@@ -9,11 +9,13 @@ from kivymd.uix.button import MDRectangleFlatButton
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.label import MDLabel
 from gps import GPSConf
+from kivy.core.audio import SoundLoader
 
 gpsd=GPSConf
 
 class Main(MDApp):
     def build(self):
+        self.alerta={"lat": -33.50014982162118, "lon": -70.61100904550202} # -33.50014982162118, -70.61100904550202
         self.gps_stat=False
         self.location={"lat": "NA", "lon": "NA"}
         self.screen = MDScreen()
