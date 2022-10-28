@@ -29,16 +29,20 @@ class Gps:
         return self.datos_relativos
 
     def comienza_gps(self, *args):
-        try:
-            gps.configure(on_location=self.datos_gps)
-            if True:
-                gps.start()
-                self.bufer_gps()
-        except:
-            self.datos_relativos = []
-            print(self.datos_relativos)
-            pass
-        return self.datos_relativos
-
+        if platform == "android":
+            from android.permissions import Permission, request_permissions
+            def callback(permission, results):
+                # CALLBACK PARA PERMISOS, REVISA PERMISOS OTORGADOS
+                if all([res for res in results]):
+                    print('Permisos otorgados')
+                    gps.configure(on_location=self.datos_gps)
+                    gps.start(minTime = 1000, minDistance = 1)
+                else:
+                    print("Permisos no otorgados")
+        else:
+            print("El dispositivo no tiene soporte GPS")
+        request_permissions([Permission.ACCESS_COARSE_LOCATION, Permission.ACCESS_FINE_LOCATION], 
+                                    callback)
+        
     #def __del__(self):
         #print('hola soy el destructor de la clase gps')

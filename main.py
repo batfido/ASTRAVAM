@@ -34,7 +34,6 @@ class MainApp(MDApp):
                     self.play_alerta()
                 else:
                     print('no hay un disco pare cercano, o la zona no tiene suficiente informacion')
-                    self.play_alerta()
             self.theme_cls.theme_style = 'Light'
             self.theme_cls.primary_palette = 'Red'
         else:
