@@ -1,0 +1,16 @@
+<ui>: 
+    MDScreen:
+        name: 'screen_principal'
+        md_bg_color: 0,.3,.5,1
+        MDBoxLayout:
+            orientation: 'vertical'
+            MDLabel:
+                id: astravam_label
+                halign: 'center'
+                text: 'Inicia ASTRAVAM'
+                pos_hint: {'center_y' : 0.5}
+            MDSwitch:
+                halign: 'center'
+                pos_hint: {'center_y' : 0.5}
+                on_active:
+                    app.change_switch(*args)
