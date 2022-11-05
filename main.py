@@ -1,8 +1,5 @@
-from operator import pos
-from turtle import bgcolor, color
 from kivy.app import App
 from kivymd.app import MDApp
-from kivy.uix.label import Label
 from kivy.utils import platform
 from plyer import gps
 from kivymd.uix.button import MDRectangleFlatButton
