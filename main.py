@@ -82,6 +82,7 @@ class GPSOperator():
             print(a_lat - 0.0001 < lat < a_lat + 0.0001 and a_lon - 0.0001 < lon < a_lon + 0.0001)
             self.alertar_pare(time())
         self.update_loc()
+
     
     def alertar_pare(*args, **kwargs):
         alerta = SoundLoader.load(path.join("resources","Pare_50m.mp3"))
@@ -92,6 +93,14 @@ class GPSOperator():
             alerta.play()
             print("reproduciendo alerta")
 
+        app.location["lon"]=my_lon
+
+    def update_loc(self, *args, **kwargs):
+        app = App.get_running_app()
+        my_lat=kwargs["lat"]
+        my_lon=kwargs["lon"]
+        app.gps_label.text =f"Ubicación: Lat:{my_lat} Lon:{my_lon}"
+        app.location["lat"]=my_lat
         app.location["lon"]=my_lon
 gpsd = GPSOperator()
 Main().run()
