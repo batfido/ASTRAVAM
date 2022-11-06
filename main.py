@@ -29,86 +29,47 @@ class Main(MDApp):
     def call_gps(self,*args):
         gpsd.run()
 
-class GPSConf():
-    def __init__(self):
-        self.id="xd"
-        pass
-    def run(*args):
-        print(args)
-        # Permisos: ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION
-        print("boton apretado")
-        gps_op=GPSOperator()
-        #if platform=="android":
-        #    gps_op.start_gps()
-        gps_op.start_gps()
-        # gps.configure(on_location=perm_manager.update_loc, on_status=gps_op.resolve_permissions)
-
-class PermManager():
-    def __init__(self) -> None:
-        pass
-
-    def resolve_permissions(self, *args, **kwargs):
-        if not App.get_running_app().gps_stat:
-            app = App.get_running_app()
-        #   if platform == "android":
-            if platform == "android":
-                from android.permissions import Permission, request_permissions
-                def callback(permission, results):
-                    # CALLBACK PARA PERMISOS, REVISA PERMISOS OTORGADOS
-                    if all([res for res in results]):
-                        print('Permisos otorgados')
-                    else:
-                        print("Permisos no otorgados")
-                request_permissions([Permission.ACCESS_COARSE_LOCATION, Permission.ACCESS_FINE_LOCATION], 
-                                    callback)
-            else:
-                app.gps_label.text ="El dispositivo no tiene soporte GPS"
-            
-        else:
-            pass
-
-class WinCheeser():
-    def __init__(self, *args, **kwargs):
-        return self
-
-    def set_location(*args, **kwargs):
-        app = App.get_running_app()
-        #app.location["lat"]=float(input("Lat"))
-        #app.location["lat"]=-33.500163752818224
-        location = input("Coords?   ")
-        location = location.split(",")
-        app.location["lat"] = float(location[0])
-        app.location["lon"] = float(location [1])
-        app.lat_label.text=str(app.location["lat"])
-        #app.location["lon"]=float(input("Lon"))
-        #app.location["lon"]=-70.61100120164757
-        app.lon_label.text=str(app.location["lon"])
-
-
-
 class GPSOperator():
     def __init__(self) -> None:
         self.id = "op"
-        self.last_played=-999999999999
-        pass
-    def start_gps(self, *args, **kwargs):
-        perm_manager=PermManager()
-        app = App.get_running_app()
-        win_cheeser = WinCheeser
-        try:
-            gps.configure(on_location=self.update_loc, on_status=perm_manager.resolve_permissions)
-            gps.start(minTime=100)
-        except NotImplementedError or ModuleNotFoundError:
-            diag=MDDialog(title="GPS no implementado", text="No se detecta un GPS utilizable por el sistema")
-            diag.open()
-            app.gps_label.pos_hint={"center_x": 1.08, "center_y": 0.15}
-            app.gps_label.text= "No se detecta un GPS utilizable por el sistema"
-            win_cheeser.set_location()
-            app.cheese_btn=MDRectangleFlatButton(text="Revisa alertas", pos_hint={"center_x": 0.5, "center_y": 0.3})
-            app.screen.add_widget(app.cheese_btn)
-            app.cheese_btn.bind(on_press = self.check_gps)
+        self.last_played=-99999999999999999999999
+    def run(*args):
+
+        # Request permissions on Android
+        if platform == 'android':
+            from android.permissions import Permission, request_permissions
+            def callback(permission, results):
+                if all([res for res in results]):
+                    print("Got all permissions")
+                    from plyer import gps
+                    gps.configure(on_location=self.update_blinker_position,
+                                  on_status=self.on_auth_status)
+                    gps.start(minTime=1000, minDistance=0)
+                else:
+                    print("Did not get all permissions")
+
+            request_permissions([Permission.ACCESS_COARSE_LOCATION,
+                                 Permission.ACCESS_FINE_LOCATION], callback)
+
+        # Configure GPS
+        if platform == 'ios':
+            from plyer import gps
+            gps.configure(on_location=self.check_gps,
+                          on_status=self.on_auth_status)
+            gps.start(minTime=1000, minDistance=0)
 
 
+    def on_auth_status(self, general_status, status_message):
+        if general_status == 'provider-enabled':
+            pass
+        else:
+            self.open_gps_access_popup()
+
+    def open_gps_access_popup(self):
+        dialog = MDDialog(title="GPS Error", text="You need to enable GPS access for the app to function properly")
+        dialog.size_hint = [.8, .8]
+        dialog.pos_hint = {'center_x': .5, 'center_y': .5}
+        dialog.open()
 
     def check_gps(*args, **kwargs):
         self = args[0]
@@ -120,8 +81,7 @@ class GPSOperator():
         if a_lat - 0.0001 < lat < a_lat + 0.0001 and a_lon - 0.0001 < lon < a_lon + 0.0001:
             print(a_lat - 0.0001 < lat < a_lat + 0.0001 and a_lon - 0.0001 < lon < a_lon + 0.0001)
             self.alertar_pare(time())
-
-        pass
+        self.update_loc()
     
     def alertar_pare(*args, **kwargs):
         alerta = SoundLoader.load(path.join("resources","Pare_50m.mp3"))
@@ -130,14 +90,8 @@ class GPSOperator():
             alerta.seek(0)
             args[0].last_played=time()
             alerta.play()
+            print("reproduciendo alerta")
 
-
-    def update_loc(self, *args, **kwargs):
-        app = App.get_running_app()
-        my_lat=kwargs["lat"]
-        my_lon=kwargs["lon"]
-        app.gps_label.text =f"Ubicación: Lat:{my_lat} Lon:{my_lon}"
-        app.location["lat"]=my_lat
         app.location["lon"]=my_lon
-gpsd = GPSConf()
+gpsd = GPSOperator()
 Main().run()
