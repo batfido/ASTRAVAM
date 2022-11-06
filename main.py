@@ -27,6 +27,7 @@ class Main(MDApp):
         self.screen.add_widget(self.lon_label)
         return self.screen
     def call_gps(self,*args):
+        gpsd = GPSOperator()
         gpsd.run()
 
 class GPSOperator():
@@ -38,16 +39,17 @@ class GPSOperator():
         # Request permissions on Android
         if platform == 'android':
             from android.permissions import Permission, request_permissions
+            print("imported Android permissions")
             def callback(permission, results):
                 if all([res for res in results]):
                     print("Got all permissions")
-                    from plyer import gps
+                    print("configuring gps")
                     gps.configure(on_location=self.update_blinker_position,
                                   on_status=self.on_auth_status)
-                    gps.start(minTime=1000, minDistance=0)
+                    gps.start(minTime=333, minDistance=0)
                 else:
                     print("Did not get all permissions")
-
+            print("requesting Android permissions")
             request_permissions([Permission.ACCESS_COARSE_LOCATION,
                                  Permission.ACCESS_FINE_LOCATION], callback)
 
@@ -56,13 +58,15 @@ class GPSOperator():
             from plyer import gps
             gps.configure(on_location=self.check_gps,
                           on_status=self.on_auth_status)
-            gps.start(minTime=1000, minDistance=0)
+            gps.start(minTime=333, minDistance=0)
 
 
     def on_auth_status(self, general_status, status_message):
+        print("revisando status de autenticacion")
         if general_status == 'provider-enabled':
             pass
         else:
+            print("Autenticacion fallida")
             self.open_gps_access_popup()
 
     def open_gps_access_popup(self):
@@ -93,7 +97,6 @@ class GPSOperator():
             alerta.play()
             print("reproduciendo alerta")
 
-        app.location["lon"]=my_lon
 
     def update_loc(self, *args, **kwargs):
         app = App.get_running_app()
@@ -102,5 +105,4 @@ class GPSOperator():
         app.gps_label.text =f"Ubicación: Lat:{my_lat} Lon:{my_lon}"
         app.location["lat"]=my_lat
         app.location["lon"]=my_lon
-gpsd = GPSOperator()
 Main().run()
